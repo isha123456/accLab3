@@ -4,8 +4,9 @@ import os
 import json
 import re
 
-from flask import Flask
+from flask import Flask, jsonify
 from celery import Celery
+
 
 app = Flask(__name__)
 app.config['CELERY_BROKER_URL'] = 'amqp://jimmy:jimmy123@localhost/jimmy_vhost'
@@ -25,9 +26,7 @@ def fun_pronoun_count(self):
     for file in fileList:
         #print file
         lines = open(path + "/" + file, 'r')
-        self.update_state(state='PROGRESS', 
-                          meta={'pronoun_count': pronoun_count,
-                                'unique_retweets': unique_retweets})    
+        
         for line in lines:
             try:
                 json_object = json.loads(line)
@@ -56,40 +55,11 @@ def fun_pronoun_count(self):
             #    continue
     print pronoun_count
     print unique_retweets
-    return {'pronoun_count': pronoun_count, 'unique_retweets': unique_retweet}
+    return {'pronoun_count': pronoun_count, 'unique_retweets' : unique_retweets}
 
-@app.route('/task_pronoun_count', methods=['POST'])
+@app.route('/task_pronoun_count', methods=['GET'])
 def task_pronoun_count():
-    task = fun_pronoun_count()
-    return jsonify({}), 202, {'Location': url_for('taskstatus', task_id = task.id)}
-
-@app.route('/status/<task_id>')
-def taskstatus(task_id):
-    pronouns = ['HAN', 'HON', 'DEN', 'DET', 'DENNA', 'DENNE', 'HEN']
-    pronoun_count = dict.fromkeys(pronouns, 0)
-    unique_retweets = 0
-
-    task = fun_pronoun_count.AsyncResult(task_id)
-    if task.state == 'PENDING':
-        response = { 'state': task.state, 
-                     'pronoun_count': pronoun_count, 
-                     'unique_retweets': unique_retweet,
-                     'status' : 'Pending...' }
-    elif task.state != 'FAILURE':
-        response = { 'state': task.state, 'status': task.info.get('status', '') }
-        if 'result' in task.info:
-            response['result'] = task.info['result']
-    else:
-        response = { 'state': task.state,
-                     'pronoun_count': pronoun_count, 
-                     'unique_retweets': unique_retweet,
-                     'status': str(task.info) }
-    return jsonify(response)
-
-        
-#pronoun_count, unique_retweets = fun_pronoun_count()
-#print pronoun_count
-#print unique_retweets
+    return jsonify(fun_pronoun_count())
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

@@ -53,8 +53,7 @@ def fun_pronoun_count(self):
             #    print retweet_count
             #    print json_object["retweeted"]
             #    continue
-    print pronoun_count
-    print unique_retweets
+    print pronoun_count, unique_retweets
     return {'pronoun_count': pronoun_count, 'unique_retweets' : unique_retweets}
 
 @app.route('/task_pronoun_count', methods=['GET'])

@@ -8,9 +8,8 @@ from flask import Flask
 from celery import Celery
 
 app = Flask(__name__)
-app.config['CELERY_BROKER_URL'] = 'amqp://localhost:6379/0'
-app.config['CELERY_RESULT_BACKEND'] = 'amqp://localhost:637970'
-
+app.config['CELERY_BROKER_URL'] = 'amqp://jimmy:jimmy123@localhost/jimmy_vhost'
+app.config['CELERY_RESULT_BACKEND'] = 'amqp://jimmy:jimmy123@localhost/jimmy_vhost'
 celery = Celery(app.name, 
                 broker=app.config['CELERY_BROKER_URL'], 
                 backend=app.config['CELERY_RESULT_BACKEND'])
